@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(vallocs LANGUAGES CXX)
+cmake_policy(SET CMP0135 NEW)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -31,3 +32,6 @@ target_include_directories(allocator_lib PUBLIC include)
 
 add_executable(allocator_demo src/main.cpp)
 target_link_libraries(allocator_demo PRIVATE allocator_lib)
+
+enable_testing()
+add_subdirectory(tests)
