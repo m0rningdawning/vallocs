@@ -18,15 +18,15 @@ endif()
 
 # Main library
 add_library(allocator_lib
-        src/alloc_core.cpp
-        src/os_abstraction.cpp
+        src/arena_allocator.cpp
+        include/arena_allocator.h
 )
 
-if(WIN32)
-    target_sources(allocator_lib PRIVATE src/win.cpp)
-else()
-    target_sources(allocator_lib PRIVATE src/linux.cpp)
-endif()
+#if(WIN32)
+#    target_sources(allocator_lib PRIVATE src/win.cpp)
+#else()
+#    target_sources(allocator_lib PRIVATE src/linux.cpp)
+#endif()
 
 target_include_directories(allocator_lib PUBLIC include)
 
