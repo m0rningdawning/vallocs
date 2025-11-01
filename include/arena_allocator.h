@@ -13,11 +13,10 @@ namespace arena {
         size_t capacity_{};
 
     public:
-        arena_allocator() = default;
-        ~arena_allocator() = default;
-
         explicit arena_allocator(size_t capacity);
         explicit arena_allocator(void* buf, size_t capacity);
+
+        ~arena_allocator();
 
         void* allocate(size_t n, size_t allignment = alignof(std::max_align_t));
         void reset();
