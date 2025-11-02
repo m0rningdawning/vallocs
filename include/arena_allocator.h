@@ -18,7 +18,7 @@ namespace arena {
 
         ~arena_allocator();
 
-        void* allocate(size_t n, size_t allignment = alignof(std::max_align_t));
+        void* allocate(size_t n, size_t alignment = alignof(std::max_align_t));
         void reset();
         void rewind(size_t marker);
         [[nodiscard]] size_t get_marker() const;
