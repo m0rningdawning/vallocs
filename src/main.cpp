@@ -7,11 +7,11 @@
 
 int main (void) {
     srand(time(nullptr));
-    arena::arena_allocator aa(1024);
+    arena::arena_allocator<char> aa(1024);
 
-    char* buf = static_cast<char*>(aa.allocate(512));
-    char* buf2 = static_cast<char*>(aa.allocate(512));
-    char* buf3 = static_cast<char*>(aa.allocate(512));
+    char* buf = aa.allocate(512);
+    char* buf2 = aa.allocate(512);
+    char* buf3 = aa.allocate(512);
 
     for (int i = 0; i < 512; ++i) {
         buf[i] = std::rand() % (122 - 97 + 1) + 97;
