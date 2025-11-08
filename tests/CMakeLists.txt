@@ -5,24 +5,41 @@ FetchContent_Declare(
         URL https://github.com/google/googletest/archive/refs/heads/main.zip
 )
 
-# Prevent GoogleTest from adding install rules
 set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-add_executable(allocator_tests
+function(add_gtest_suite NAME)
+    set(options)
+    set(oneValueArgs)
+    set(multiValueArgs SOURCES LIBS)
+    cmake_parse_arguments(SUITE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    if (NOT SUITE_SOURCES)
+        message(FATAL_ERROR "add_gtest_suite(${NAME}) requires SOURCES <files...>")
+    endif ()
+
+    add_executable(${NAME} ${SUITE_SOURCES})
+    target_link_libraries(${NAME}
+            PRIVATE
+            allocators_lib
+            GTest::gtest_main
+            ${SUITE_LIBS}
+    )
+    set_target_properties(${NAME} PROPERTIES
+            CXX_STANDARD 20
+            CXX_STANDARD_REQUIRED ON
+    )
+
+    include(GoogleTest)
+    gtest_discover_tests(${NAME}
+            TEST_PREFIX "${NAME}."
+            PROPERTIES LABELS "${NAME}"
+            DISCOVERY_TIMEOUT 30
+    )
+endfunction()
+
+# Arena allocator test suite
+add_gtest_suite(arena_tests
+        SOURCES
         u_test_arena.cpp
 )
-
-target_link_libraries(allocator_tests
-        PRIVATE
-        allocator_lib
-        GTest::gtest_main
-)
-
-set_target_properties(allocator_tests PROPERTIES
-        CXX_STANDARD 20
-        CXX_STANDARD_REQUIRED ON
-)
-
-include(GoogleTest)
-gtest_discover_tests(allocator_tests)

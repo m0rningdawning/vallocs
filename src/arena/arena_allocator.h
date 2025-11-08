@@ -40,12 +40,13 @@ namespace vallocs::arena {
         }
 
         explicit arena_allocator(void* buf, const size_t capacity) {
-            base_ptr_ = std::shared_ptr<void>(buf, [](void*) {});
+            base_ptr_ = std::shared_ptr<void>(buf, [](void*) {
+            });
             capacity_ = capacity;
         }
 
         ~arena_allocator() {
-            reset();
+            release();
         }
 
         T* allocate(const size_t n = 1) {
@@ -53,17 +54,21 @@ namespace vallocs::arena {
         }
 
         void reset() {
+            offset_ = 0;
+        }
+
+        void release() {
             base_ptr_.reset();
             offset_ = 0;
             capacity_ = 0;
         }
 
-        [[nodiscard]] size_t get_marker() const {
-            return offset_;
-        }
-
         void rewind(const size_t marker) {
             if (marker <= offset_ && marker <= capacity_) offset_ = marker;
+        }
+
+        [[nodiscard]] size_t get_marker() const {
+            return offset_;
         }
     };
 }
