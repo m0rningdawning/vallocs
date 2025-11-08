@@ -9,28 +9,22 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if (WIN32)
     message(STATUS "Building for Windows (MinGW)")
     add_definitions(-DPLATFORM_WINDOWS)
-elseif (UNIX)
+elseif (LINUX)
     message(STATUS "Building for Linux/Unix")
-    add_definitions(-DPLATFORM_UNIX)
+    add_definitions(-DPLATFORM_LINUX)
 endif ()
 
 #include(cmake/CompilerFlags.cmake)
 
-# Allocs
+# Libs
+enable_testing()
 add_subdirectory(src/arena)
+add_subdirectory(src/platform)
+add_subdirectory(tests)
 
 # Libs link
 add_library(allocators_lib INTERFACE)
-target_link_libraries(allocators_lib INTERFACE arena_lib)
-
-#if(WIN32)
-#    target_sources(allocator_lib PRIVATE src/win.cpp)
-#else()
-#    target_sources(allocator_lib PRIVATE src/linux.cpp)
-#endif()
+target_link_libraries(allocators_lib INTERFACE platform_lib arena_lib)
 
 add_executable(allocator_demo src/main.cpp)
 target_link_libraries(allocator_demo PRIVATE allocators_lib)
-
-enable_testing()
-add_subdirectory(tests)

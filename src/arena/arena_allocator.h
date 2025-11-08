@@ -9,8 +9,9 @@
 #include <new>
 #include <cassert>
 #include <windows.h>
+#include "platform.h"
 
-namespace arena {
+namespace vallocs::arena {
     template <typename T>
     class arena_allocator {
         std::shared_ptr<void> base_ptr_;
@@ -29,10 +30,11 @@ namespace arena {
 
     public:
         explicit arena_allocator(const size_t capacity) {
-            void* base_raw = VirtualAlloc(nullptr, capacity, MEM_COMMIT, PAGE_READWRITE);
+            // void* base_raw = VirtualAlloc(nullptr, capacity, MEM_COMMIT, PAGE_READWRITE);
+            void* base_raw = platform::arena::platform_memory::commit(nullptr, capacity);
             if (!base_raw) throw std::bad_alloc();
             base_ptr_ = std::shared_ptr<void>(base_raw, [](void* p) {
-                if (p) VirtualFree(p, 0, MEM_RELEASE);
+                if (p) platform::arena::platform_memory::release(p);
             });
             capacity_ = capacity;
         }
@@ -43,7 +45,7 @@ namespace arena {
         }
 
         ~arena_allocator() {
-            base_ptr_.reset();
+            reset();
         }
 
         T* allocate(const size_t n = 1) {

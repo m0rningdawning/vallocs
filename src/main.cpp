@@ -7,7 +7,7 @@
 
 int main () {
     srand(time(nullptr));
-    arena::arena_allocator<char> aa(1024);
+    vallocs::arena::arena_allocator<char> aa(1024);
 
     char* buf = aa.allocate(512);
     char* buf2 = aa.allocate(512);
