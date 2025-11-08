@@ -10,7 +10,7 @@ set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 add_executable(allocator_tests
-        u_tests.cpp
+        u_test_arena.cpp
 )
 
 target_link_libraries(allocator_tests

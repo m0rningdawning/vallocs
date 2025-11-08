@@ -3,9 +3,9 @@
 //
 
 #include <iostream>
-#include "arena_allocator.h"
+#include "arena/arena_allocator.h"
 
-int main (void) {
+int main () {
     srand(time(nullptr));
     arena::arena_allocator<char> aa(1024);
 

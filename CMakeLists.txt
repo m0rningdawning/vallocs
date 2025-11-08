@@ -6,21 +6,22 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if(WIN32)
+if (WIN32)
     message(STATUS "Building for Windows (MinGW)")
     add_definitions(-DPLATFORM_WINDOWS)
-elseif(UNIX)
+elseif (UNIX)
     message(STATUS "Building for Linux/Unix")
     add_definitions(-DPLATFORM_UNIX)
-endif()
+endif ()
 
 #include(cmake/CompilerFlags.cmake)
 
-# Main library
-add_library(allocator_lib
-        src/arena_allocator.cpp
-        include/arena_allocator.h
-)
+# Allocs
+add_subdirectory(src/arena)
+
+# Libs link
+add_library(allocators_lib INTERFACE)
+target_link_libraries(allocators_lib INTERFACE arena_lib)
 
 #if(WIN32)
 #    target_sources(allocator_lib PRIVATE src/win.cpp)
@@ -28,10 +29,8 @@ add_library(allocator_lib
 #    target_sources(allocator_lib PRIVATE src/linux.cpp)
 #endif()
 
-target_include_directories(allocator_lib PUBLIC include)
-
 add_executable(allocator_demo src/main.cpp)
-target_link_libraries(allocator_demo PRIVATE allocator_lib)
+target_link_libraries(allocator_demo PRIVATE allocators_lib)
 
 enable_testing()
 add_subdirectory(tests)
