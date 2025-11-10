@@ -31,7 +31,9 @@ namespace platform::arena {
         if (!region) return true;
         return VirtualFree(region, 0, MEM_RELEASE) != 0;
     }
-
+    bool platform_memory::release(void* addr, std::size_t /*bytes*/) {
+        return platform_memory::release(addr);
+    }
 }
 
 #endif

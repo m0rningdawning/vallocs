@@ -8,7 +8,6 @@
 #include <memory>
 #include <new>
 #include <cassert>
-#include <windows.h>
 #include "platform.h"
 
 namespace vallocs::arena {
@@ -31,10 +30,12 @@ namespace vallocs::arena {
     public:
         explicit arena_allocator(const size_t capacity) {
             // void* base_raw = VirtualAlloc(nullptr, capacity, MEM_COMMIT, PAGE_READWRITE);
-            void* base_raw = platform::arena::platform_memory::commit(nullptr, capacity);
+            void* base_raw = platform::arena::platform_memory::reserve(capacity);
             if (!base_raw) throw std::bad_alloc();
-            base_ptr_ = std::shared_ptr<void>(base_raw, [](void* p) {
-                if (p) platform::arena::platform_memory::release(p);
+            if (!platform::arena::platform_memory::commit(base_raw, capacity))
+                throw std::bad_alloc();
+            base_ptr_ = std::shared_ptr<void>(base_raw, [capacity](void* p) {
+                if (p) platform::arena::platform_memory::release(p, capacity);
             });
             capacity_ = capacity;
         }

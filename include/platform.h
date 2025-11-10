@@ -18,6 +18,7 @@ namespace platform::arena {
         static void* commit(void* addr, std::size_t bytes);
         static bool decommit(void* addr, std::size_t bytes);
         static bool release(void* region);
+        static bool release(void* addr, std::size_t bytes);
     };
 }
 
