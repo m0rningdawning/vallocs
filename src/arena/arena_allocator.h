@@ -29,7 +29,6 @@ namespace vallocs::arena {
 
     public:
         explicit arena_allocator(const size_t capacity) {
-            // void* base_raw = VirtualAlloc(nullptr, capacity, MEM_COMMIT, PAGE_READWRITE);
             void* base_raw = platform::arena::platform_memory::reserve(capacity);
             if (!base_raw) throw std::bad_alloc();
             if (!platform::arena::platform_memory::commit(base_raw, capacity))

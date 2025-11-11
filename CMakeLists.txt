@@ -14,8 +14,6 @@ elseif (UNIX AND NOT APPLE)
     add_definitions(-DPLATFORM_LINUX)
 endif ()
 
-#include(cmake/CompilerFlags.cmake)
-
 # Libs
 enable_testing()
 add_subdirectory(src/arena)
