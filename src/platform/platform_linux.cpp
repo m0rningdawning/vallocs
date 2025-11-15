@@ -30,13 +30,13 @@ namespace platform::arena {
     }
 
     bool platform_memory::decommit(void* addr, std::size_t bytes) {
-        if (!addr || !bytes) return true;
+        if (!addr || !bytes) return false;
         ::madvise(addr, bytes, MADV_DONTNEED);
         return ::mprotect(addr, bytes, PROT_NONE) == 0;
     }
 
     bool platform_memory::release(void* addr, std::size_t bytes) {
-        if (!addr || !bytes) return true;
+        if (!addr || !bytes) return false;
         return ::munmap(addr, bytes) == 0;
     }
 }

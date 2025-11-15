@@ -15,24 +15,28 @@ namespace platform::arena {
     }
 
     void* platform_memory::reserve(const std::size_t bytes) {
+        if (!bytes) return nullptr;
         void* p = VirtualAlloc(nullptr, bytes, MEM_RESERVE, PAGE_READWRITE);
         return p;
     }
 
     void* platform_memory::commit(void* addr, const std::size_t bytes) {
+        if (!addr || !bytes) return nullptr;
         return VirtualAlloc(addr, bytes, MEM_COMMIT, PAGE_READWRITE);
     }
 
     bool platform_memory::decommit(void* addr, const std::size_t bytes) {
+        if (!addr || !bytes) return false;
         return VirtualFree(addr, bytes, MEM_DECOMMIT) != 0;
     }
 
     bool platform_memory::release(void* region) {
-        if (!region) return true;
+        if (!region) return false;
         return VirtualFree(region, 0, MEM_RELEASE) != 0;
     }
-    bool platform_memory::release(void* addr, std::size_t /*bytes*/) {
-        return platform_memory::release(addr);
+    bool platform_memory::release(void* addr, std::size_t /* bytes placeholder to keep the api unified */) {
+        if (!addr) return false;
+        return release(addr);
     }
 }
 

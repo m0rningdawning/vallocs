@@ -4,10 +4,10 @@ Various mamory allocators implemented in C++
 ### TODO
 - [ ] Arena Allocator
   - [x] Create a basic, win version of the allocator
-  - [ ] Abstract it + make linux hooks for cross-platform
+  - [x] Abstract it + make linux hooks for cross-platform
   - [x] Put templates on it
   - [ ] Make it iterable
-  - [ ] Add protection
+  - [x] Add protection
   - [ ] Container support
   - [ ] Possible growth strats
   - [ ] Test it with gtest
