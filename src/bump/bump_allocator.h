@@ -2,17 +2,17 @@
 // Created by Paul on 27/10/2025.
 //
 
-#ifndef ARENA_ALLOCATOR_H
-#define ARENA_ALLOCATOR_H
+#ifndef BUMP_ALLOCATOR_H
+#define BUMP_ALLOCATOR_H
 
 #include <memory>
 #include <new>
 #include <cassert>
 #include "platform.h"
 
-namespace vallocs::arena {
+namespace vallocs::bump {
     template <typename T>
-    class arena_allocator {
+    class bump_allocator {
         std::shared_ptr<void> base_ptr_;
         size_t offset_{0};
         size_t capacity_{0};
@@ -28,29 +28,33 @@ namespace vallocs::arena {
         }
 
     public:
-        explicit arena_allocator(const size_t capacity) {
-            void* base_raw = platform::arena::platform_memory::reserve(capacity);
+        explicit bump_allocator(const size_t capacity) {
+            void* base_raw = platform::bump::platform_memory::reserve(capacity);
             if (!base_raw) throw std::bad_alloc();
-            if (!platform::arena::platform_memory::commit(base_raw, capacity))
+            if (!platform::bump::platform_memory::commit(base_raw, capacity))
                 throw std::bad_alloc();
             base_ptr_ = std::shared_ptr<void>(base_raw, [capacity](void* p) {
-                if (p) platform::arena::platform_memory::release(p, capacity);
+                if (p) platform::bump::platform_memory::release(p, capacity);
             });
             capacity_ = capacity;
         }
 
-        explicit arena_allocator(void* buf, const size_t capacity) {
+        explicit bump_allocator(void* buf, const size_t capacity) {
             base_ptr_ = std::shared_ptr<void>(buf, [](void*) {
             });
             capacity_ = capacity;
         }
 
-        ~arena_allocator() {
+        ~bump_allocator() {
             release();
         }
 
         T* allocate(const size_t n = 1) {
             return allocate_(sizeof(T) * n, alignof(T));
+        }
+
+        std::span<T> allocate_span(std::size_t n) {
+            return {allocate(n), n};
         }
 
         void reset() {
@@ -73,4 +77,4 @@ namespace vallocs::arena {
     };
 }
 
-#endif //ARENA_ALLOCATOR_H
+#endif //BUMP_ALLOCATOR_H

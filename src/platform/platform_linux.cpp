@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace platform::arena {
+namespace platform::bump {
     static std::size_t page_size() {
         static std::size_t ps = static_cast<std::size_t>(::sysconf(_SC_PAGESIZE));
         return ps;

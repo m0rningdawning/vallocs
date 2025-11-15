@@ -39,7 +39,7 @@ function(add_gtest_suite NAME)
 endfunction()
 
 # Arena allocator test suite
-add_gtest_suite(arena_tests
+add_gtest_suite(bump_tests
         SOURCES
-        u_test_arena.cpp
+        u_test_bump.cpp
 )

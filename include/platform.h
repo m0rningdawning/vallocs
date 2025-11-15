@@ -6,7 +6,7 @@
 #define VALLOCS_PLATFORM_H
 #include <cstddef>
 
-namespace platform::arena {
+namespace platform::bump {
     class platform_memory {
     public:
         static void* reserve(std::size_t bytes);

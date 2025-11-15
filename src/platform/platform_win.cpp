@@ -7,7 +7,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-namespace platform::arena {
+namespace platform::bump {
     static std::size_t page_size() {
         SYSTEM_INFO si{};
         GetSystemInfo(&si);

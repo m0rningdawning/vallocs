@@ -3,14 +3,16 @@
 //
 
 #include <iostream>
-#include "arena/arena_allocator.h"
+#include <span>
+
+#include "bump/bump_allocator.h"
 
 int main () {
     srand(time(nullptr));
-    vallocs::arena::arena_allocator<char> aa(1024);
+    vallocs::bump::bump_allocator<char> aa(1024);
 
     char* buf = aa.allocate(512);
-    char* buf2 = aa.allocate(512);
+    auto buf2 = aa.allocate_span(512);
     char* buf3 = aa.allocate(512);
 
     for (int i = 0; i < 512; ++i) {
@@ -19,15 +21,12 @@ int main () {
     }
 
     std::cout << "Buf 1:\n";
-    // Need to make it templated + implement the ranges (begin, end)
-    // for (const char c : buf) std::cout << c;
     for (int i = 0; i < 512; ++i) std::cout << buf[i];
 
     std::cout << "\nBuf 2:\n";
-    // for (const char c : buf2) std::cout << c;
-    for (int i = 0; i < 512; ++i) std::cout << buf2[i];
+    for (const char c : buf2) std::cout << c;
 
     std::cout << "\n" << static_cast<void*>(buf) << "\n";
-    std::cout << static_cast<void*>(buf2) << "\n";
+    std::cout << static_cast<void*>(buf2.data())<< "\n";
     std::cout << static_cast<void*>(buf3) << "\n";
 }
