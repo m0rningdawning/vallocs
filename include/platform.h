@@ -7,11 +7,6 @@
 #include <cstddef>
 
 namespace platform::arena {
-    // struct v_region {
-    //     void* base{};
-    //     std::size_t size{};
-    // };
-    //
     class platform_memory {
     public:
         static void* reserve(std::size_t bytes);
