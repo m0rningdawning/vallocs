@@ -15,15 +15,17 @@ namespace vallocs::bump {
     class bump_allocator {
         std::shared_ptr<void> base_ptr_;
         size_t offset_{0};
+        size_t last_offset_{0};
         size_t capacity_{0};
 
         T* allocate_(const size_t n, const size_t alignment = alignof(T)) {
             void* ua_resource = static_cast<char*>(base_ptr_.get()) + offset_;
-            size_t space = capacity_ >= offset_ ? capacity_ - offset_ : 0;
+            size_t free_space = capacity_ >= offset_ ? capacity_ - offset_ : 0;
 
-            void* resource = std::align(alignment, n, ua_resource, space);
+            void* resource = std::align(alignment, n, ua_resource, free_space);
             if (!resource) return nullptr;
-            offset_ += capacity_ - offset_ - space + n;
+
+            offset_ += capacity_ - offset_ - free_space + n;
             return static_cast<T*>(resource);
         }
 
@@ -55,6 +57,28 @@ namespace vallocs::bump {
 
         std::span<T> allocate_span(std::size_t n) {
             return {allocate(n), n};
+        }
+
+        // test this
+        T* resize(T* ptr, const std::size_t old_count, const std::size_t new_count) {
+            const auto base = static_cast<char*>(base_ptr_.get());
+            const auto old_size = old_count * sizeof(T);
+            const auto new_size = new_count * sizeof(T);
+
+            if (char* last_begin = base + offset_ - old_size; ptr != reinterpret_cast<T*>(last_begin))
+                return nullptr;
+
+            if (new_size <= old_size) {
+                offset_ -= old_size - new_size;
+                return ptr;
+            }
+
+            const std::size_t extra = new_size - old_size;
+            if (offset_ + extra > capacity_)
+                return nullptr;
+
+            offset_ += extra;
+            return ptr;
         }
 
         void reset() {

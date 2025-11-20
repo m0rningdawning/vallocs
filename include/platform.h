@@ -21,4 +21,16 @@ namespace platform::stack {
 
 }
 
+namespace platform::fl {
+
+}
+
+namespace platform::pool {
+
+}
+
+namespace platform::buddy{
+
+}
+
 #endif //VALLOCS_PLATFORM_H
