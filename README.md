@@ -9,7 +9,7 @@ Various mamory allocators implemented in C++
   - [x] Make it iterable
   - [x] Add protection
   - [ ] Container support
-  - [ ] Possible growth strats
+  - [x] Possible growth strats
   - [x] Test it with gtest
   - [ ] Try to incorporate grpc/protobuf in it
   - [ ] Clean-up, review, list of improvements, move on.
