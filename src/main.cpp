@@ -5,7 +5,7 @@
 #include <iostream>
 #include <span>
 
-#include "bump/bump_allocator.h"
+#include "allocs/bump/bump_allocator.h"
 
 int main () {
     srand(time(nullptr));

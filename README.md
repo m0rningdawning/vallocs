@@ -8,7 +8,6 @@ Various mamory allocators implemented in C++
   - [x] Put templates on it
   - [x] Make it iterable
   - [x] Add protection
-  - [ ] Container support
   - [x] Possible growth strats
   - [x] Test it with gtest
   - [ ] Try to incorporate grpc/protobuf in it

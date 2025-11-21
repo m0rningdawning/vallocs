@@ -16,7 +16,7 @@ endif ()
 
 # Libs
 enable_testing()
-add_subdirectory(src/bump)
+add_subdirectory(src/allocs/bump)
 add_subdirectory(src/platform)
 add_subdirectory(tests)
 

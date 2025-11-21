@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package vallocs.rpc;
+
+service BumpAllocatorService {
+  rpc CreateArena (CreateArenaRequest) returns (CreateArenaResponse);
+  rpc Allocate    (AllocateRequest)    returns (AllocateResponse);
+  rpc Reset       (ResetRequest)       returns (ResetResponse);
+}
+
+message CreateArenaRequest {
+  uint64 capacity = 1;
+}
+
+message CreateArenaResponse {
+  uint64 arena_id = 1;
+}
+
+message AllocateRequest {
+  uint64 arena_id = 1;
+  uint64 size     = 2;
+}
+
+message AllocateResponse {
+  uint64 arena_id = 1;
+  uint64 offset   = 2;  // byte offset from arena base
+}
+
+message ResetRequest {
+  uint64 arena_id = 1;
+}
+
+message ResetResponse {
+  bool ok = 1;
+}
