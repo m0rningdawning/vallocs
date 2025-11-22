@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 #include <cstdint>
-#include "../src/bump/bump_allocator.h"
+#include "../src/allocs/bump/bump_allocator.h"
 
 using ArenaT = vallocs::bump::bump_allocator<char>;
 

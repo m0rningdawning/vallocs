@@ -15,6 +15,8 @@ elseif (UNIX AND NOT APPLE)
 endif ()
 
 # Libs
+#find_package(gRPC CONFIG REQUIRED)
+#find_package(Protobuf CONFIG REQUIRED)
 enable_testing()
 add_subdirectory(src/allocs/bump)
 add_subdirectory(src/platform)

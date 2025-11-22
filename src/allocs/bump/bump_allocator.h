@@ -13,16 +13,14 @@
 
 namespace vallocs::bump {
     template <typename T>
-
     class bump_allocator {
         // swap this to unique_ptr
-        // think about nexcept usage
         std::shared_ptr<void> base_ptr_;
         size_t offset_{0};
         size_t last_offset_{0};
         size_t capacity_{0};
 
-        T* allocate_(const size_t n, const size_t alignment = alignof(T)) noexcept {
+        T* allocate_(const size_t n, const size_t alignment = alignof(T)) {
             void* ua_resource = static_cast<char*>(base_ptr_.get()) + offset_;
             size_t free_space = capacity_ >= offset_ ? capacity_ - offset_ : 0;
 
@@ -34,7 +32,7 @@ namespace vallocs::bump {
         }
 
     public:
-        explicit bump_allocator(const size_t capacity) {
+        explicit bump_allocator(const size_t capacity) noexcept {
             void* base_raw = platform::bump::platform_memory::reserve(capacity);
             if (!base_raw) throw std::bad_alloc();
             if (!platform::bump::platform_memory::commit(base_raw, capacity))
@@ -45,7 +43,7 @@ namespace vallocs::bump {
             capacity_ = capacity;
         }
 
-        explicit bump_allocator(void* buf, const size_t capacity) {
+        explicit bump_allocator(void* buf, const size_t capacity) noexcept {
             base_ptr_ = std::shared_ptr<void>(buf, [](void*) noexcept {
             });
             capacity_ = capacity;
@@ -55,7 +53,7 @@ namespace vallocs::bump {
             release();
         }
 
-        T* allocate(const size_t n = 1) noexcept {
+        T* allocate(const size_t n = 1) {
             if (n > 0 && sizeof(T) > std::numeric_limits<size_t>::max() / n)
                 return nullptr;
             return allocate_(sizeof(T) * n, alignof(T));
@@ -101,7 +99,7 @@ namespace vallocs::bump {
             if (marker <= offset_ && marker <= capacity_) offset_ = marker;
         }
 
-        [[nodiscard]] size_t get_marker() const {
+        [[nodiscard]] size_t get_marker() const noexcept {
             return offset_;
         }
     };
