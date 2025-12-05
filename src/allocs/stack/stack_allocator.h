@@ -11,6 +11,7 @@
 #include <new>
 #include <limits>
 #include <cassert>
+#include "platform.h"
 
 // Test that shi
 namespace vallocs::stack {
@@ -73,8 +74,9 @@ namespace vallocs::stack {
                 offset_ = hdr->offset;
             }
         }
+
         ~stack_allocator() {
-           clear();
+            clear();
         };
 
         template <typename U>
@@ -82,6 +84,40 @@ namespace vallocs::stack {
             : base_ptr_(other.base_ptr_),
               capacity_(other.capacity_),
               offset_(other.offset_) {
+        }
+
+        // especially this!!
+        explicit stack_allocator(const std::size_t capacity) {
+            if (capacity == 0) throw std::bad_alloc();
+
+            constexpr std::size_t header_bytes = sizeof(stack_header);
+            const std::size_t total_bytes = header_bytes + capacity;
+            capacity_ = capacity;
+
+            void* region = platform::bump::platform_memory::reserve(total_bytes);
+            if (!region) throw std::bad_alloc();
+            if (!platform::bump::platform_memory::commit(region, total_bytes)) {
+                platform::bump::platform_memory::release(region, total_bytes);
+                throw std::bad_alloc();
+            }
+
+            auto* region_bytes = static_cast<std::byte*>(region);
+            void* base_usable = region_bytes + header_bytes;
+
+            base_ptr_ = std::shared_ptr<void>(base_usable, [total_bytes](void* p) {
+                if (!p) return;
+                auto* usable = static_cast<std::byte*>(p);
+                auto* region_start = usable - sizeof(stack_header);
+                platform::bump::platform_memory::release(region_start, total_bytes);
+            });
+
+            if (auto* hdr = get_stack_header(base_ptr_.get())) {
+                hdr->init(capacity_, alignof(std::max_align_t));
+                offset_ = hdr->offset;
+            }
+            else {
+                throw std::bad_alloc();
+            }
         }
 
         [[nodiscard]] T* allocate(std::size_t n) {
