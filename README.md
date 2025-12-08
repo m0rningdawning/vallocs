@@ -13,6 +13,8 @@ Various mamory allocators implemented in C++
   - [ ] Try to incorporate grpc/protobuf in it
   - [ ] Clean-up, review, list of improvements, move on.
 - [ ] Stack Allocator
+  - [ ] Proper alloc
+  - [ ] Test with gTest
 - [ ] Pool Allocator
 - [ ] Free-List Allocator
 - [ ] Buddy Allocator

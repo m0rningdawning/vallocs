@@ -4,16 +4,24 @@
 
 #include <iostream>
 #include <span>
+#include <sys/stat.h>
 
 #include "allocs/bump/bump_allocator.h"
+#include "allocs/stack/stack_allocator.h"
 
-int main () {
+enum class alocs_e {
+    BUMP_ALLOCATOR = 1,
+    STACK_ALLOCATOR = 2,
+};
+
+void test_bump() {
+    std::cout << "Bump/Arena Allocator Test:\n";
     srand(time(nullptr));
-    vallocs::bump::bump_allocator<char> aa(1024);
+    vallocs::bump::bump_allocator<char> ba(1024);
 
-    char* buf = aa.allocate(512);
-    auto buf2 = aa.allocate_span(512);
-    char* buf3 = aa.allocate(512);
+    char* buf = ba.allocate(512);
+    auto buf2 = ba.allocate_span(512);
+    char* buf3 = ba.allocate(512);
 
     for (int i = 0; i < 512; ++i) {
         buf[i] = std::rand() % (122 - 97 + 1) + 97;
@@ -27,6 +35,54 @@ int main () {
     for (const char c : buf2) std::cout << c;
 
     std::cout << "\n" << static_cast<void*>(buf) << "\n";
-    std::cout << static_cast<void*>(buf2.data())<< "\n";
+    std::cout << static_cast<void*>(buf2.data()) << "\n";
     std::cout << static_cast<void*>(buf3) << "\n";
+}
+
+void test_stack() {
+    std::cout << "Stack Allocator Test:\n";
+    srand(time(nullptr));
+    vallocs::stack::stack_allocator<char> sa(1024);
+    char* buf = sa.allocate(450);
+    char* buf2 = sa.allocate(450);
+
+    for (int i = 0; i < 450; ++i) {
+        buf[i] = std::rand() % (122 - 97 + 1) + 97;
+        buf2[i] = std::rand() % (122 - 97 + 1) + 97;
+    }
+
+    std::cout << "Buf 1:\n";
+    for (int i = 0; i < 450; ++i) std::cout << buf[i];
+
+    std::cout << "\nBuf 2:\n";
+    for (int i = 0; i < 450; ++i) std::cout << buf2[i];
+
+    std::cout << "\n" << static_cast<void*>(buf) << "\n";
+    std::cout << static_cast<void*>(buf2) << "\n";
+}
+
+int main() {
+    int alloc {};
+    bool chosen { false };
+    do {
+        std::cout << "Enter allocation type: " << std::flush;
+        std::cin >> alloc;
+        switch (alloc) {
+            case static_cast<int>(alocs_e::BUMP_ALLOCATOR): {
+                test_bump();
+                chosen = true;
+                break;
+            }
+            case static_cast<int>(alocs_e::STACK_ALLOCATOR): {
+                test_stack();
+                chosen = true;
+                break;
+            }
+            default: {
+                std::cout << "No allocator chosen, please choose one of the allocators from the enum"  << "\n" ;
+                break;
+            }
+        }
+    } while (!chosen);
+    return 0;
 }

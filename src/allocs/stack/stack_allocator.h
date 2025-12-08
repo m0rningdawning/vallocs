@@ -77,7 +77,7 @@ namespace vallocs::stack {
 
         ~stack_allocator() {
             clear();
-        };
+        }
 
         template <typename U>
         explicit stack_allocator(const stack_allocator<U>& other) noexcept
@@ -138,17 +138,18 @@ namespace vallocs::stack {
             auto* region_start = static_cast<std::byte*>(base);
             auto* current_top = region_start + hdr->offset;
 
-            const std::size_t free_space = (hdr->offset <= hdr->capacity)
-                                               ? hdr->capacity - hdr->offset
-                                               : 0;
-            // need space for header + payload (plus alignment padding)
+            const std::size_t free_space =
+                (hdr->offset <= hdr->capacity) ? (hdr->capacity - hdr->offset) : 0;
+
+            // we need at least space for header + payload (plus some padding)
             if (free_space < sizeof(alloc_header) + total_size)
                 throw std::bad_alloc();
 
-            // First, reserve space for alloc_header; start tentative user area after it.
-            std::byte* header_pos = current_top;
+            // Place header at current_top
+            auto* header_pos = reinterpret_cast<alloc_header*>(current_top);
 
-            void* user_ua = header_pos + sizeof(alloc_header);
+            // initial user area right after header
+            void* user_ua = current_top + sizeof(alloc_header);
             std::size_t ava = free_space - sizeof(alloc_header);
 
             void* user_ptr = user_ua;
@@ -157,17 +158,16 @@ namespace vallocs::stack {
 
             auto* user_byte = static_cast<std::byte*>(user_ptr);
 
-            // padding from end of header area to aligned payload start
+            // padding between end of header and payload
             const std::size_t padding =
-                static_cast<std::size_t>(user_byte - (header_pos + sizeof(alloc_header)));
+                static_cast<std::size_t>(user_byte - (current_top + sizeof(alloc_header)));
 
-            // Place alloc_header immediately before user pointer
-            auto* ah = reinterpret_cast<alloc_header*>(user_byte - sizeof(alloc_header));
-            ah->previous_offset = hdr->offset;
-            ah->size = total_size;
-            ah->padding = static_cast<std::uint16_t>(padding);
+            // Fill header at header_pos
+            header_pos->previous_offset = hdr->offset;
+            header_pos->size = total_size;
+            header_pos->padding = static_cast<std::uint16_t>(padding);
 
-            // New top at end of payload
+            // New top is end of payload
             const std::byte* new_top = user_byte + total_size;
             hdr->offset = static_cast<std::size_t>(new_top - region_start);
             hdr->allocation_count += 1;
@@ -187,13 +187,11 @@ namespace vallocs::stack {
             const auto* region_start = static_cast<std::byte*>(base);
             auto* user_byte = reinterpret_cast<std::byte*>(p);
 
-            const auto* ah = reinterpret_cast<alloc_header*>(user_byte - sizeof(alloc_header));
+            auto* ah = reinterpret_cast<alloc_header*>(user_byte - sizeof(alloc_header));
 
-            // expected current offset if this is the top block
-            const std::size_t expected_offset =
+            std::size_t expected_offset =
                 static_cast<std::size_t>((user_byte + ah->size) - region_start);
 
-            // LIFO check
             if (hdr->offset == expected_offset) {
                 hdr->offset = ah->previous_offset;
                 if (hdr->allocation_count > 0)
@@ -201,7 +199,6 @@ namespace vallocs::stack {
                 offset_ = hdr->offset;
             }
             else {
-                // out-of-order free; ignore or assert in debug
                 assert(false && "stack_allocator::deallocate out of LIFO order");
             }
         }
