@@ -1,6 +1,6 @@
-file(GLOB PLATFORM_COMMON CONFIGURE_DEPENDS
-    ${CMAKE_CURRENT_SOURCE_DIR}/platform_mem.cpp
-)
+#file(GLOB PLATFORM_COMMON CONFIGURE_DEPENDS
+#    ${CMAKE_CURRENT_SOURCE_DIR}/platform_mem.cpp
+#)
 
 set(LIB_NAME platform_lib)
 

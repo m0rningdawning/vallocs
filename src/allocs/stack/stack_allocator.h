@@ -44,12 +44,6 @@ namespace vallocs::stack {
         return reinterpret_cast<stack_header*>(p) - 1;
     }
 
-    inline const stack_header* get_stack_header(const void* base_usable) noexcept {
-        if (!base_usable) return nullptr;
-        auto* p = static_cast<const std::byte*>(base_usable);
-        return reinterpret_cast<const stack_header*>(p) - 1;
-    }
-
     template <typename T>
     class stack_allocator {
         std::shared_ptr<void> base_ptr_;
@@ -57,19 +51,11 @@ namespace vallocs::stack {
         std::size_t offset_{0};
 
     public:
-        template <typename U>
-        struct rebind {
-            using other = stack_allocator<U>;
-        };
-
         stack_allocator() noexcept = default;
 
-        stack_allocator(void* base_ptr, std::size_t capacity) noexcept
-            : base_ptr_(base_ptr, [](void*) noexcept {
-              }),
-              capacity_(capacity) {
+        stack_allocator(void* base_ptr, const std::size_t capacity) noexcept
+            : base_ptr_(base_ptr, [](void*) noexcept {}), capacity_(capacity) {
             if (auto* hdr = get_stack_header(base_ptr_.get())) {
-                // use max_align_t as default alignment for the region itself
                 hdr->init(capacity_, alignof(std::max_align_t));
                 offset_ = hdr->offset;
             }
@@ -86,7 +72,6 @@ namespace vallocs::stack {
               offset_(other.offset_) {
         }
 
-        // especially this!!
         explicit stack_allocator(const std::size_t capacity) {
             if (capacity == 0) throw std::bad_alloc();
 
@@ -94,10 +79,10 @@ namespace vallocs::stack {
             const std::size_t total_bytes = header_bytes + capacity;
             capacity_ = capacity;
 
-            void* region = platform::bump::platform_memory::reserve(total_bytes);
+            void* region = platform::memory::reserve(total_bytes);
             if (!region) throw std::bad_alloc();
-            if (!platform::bump::platform_memory::commit(region, total_bytes)) {
-                platform::bump::platform_memory::release(region, total_bytes);
+            if (!platform::memory::commit(region, total_bytes)) {
+                platform::memory::release(region, total_bytes);
                 throw std::bad_alloc();
             }
 
@@ -108,7 +93,7 @@ namespace vallocs::stack {
                 if (!p) return;
                 auto* usable = static_cast<std::byte*>(p);
                 auto* region_start = usable - sizeof(stack_header);
-                platform::bump::platform_memory::release(region_start, total_bytes);
+                platform::memory::release(region_start, total_bytes);
             });
 
             if (auto* hdr = get_stack_header(base_ptr_.get())) {
@@ -141,14 +126,13 @@ namespace vallocs::stack {
             const std::size_t free_space =
                 (hdr->offset <= hdr->capacity) ? (hdr->capacity - hdr->offset) : 0;
 
-            // we need at least space for header + payload (plus some padding)
+            // space for header + payload (plus some padding)
             if (free_space < sizeof(alloc_header) + total_size)
                 throw std::bad_alloc();
 
-            // Place header at current_top
             auto* header_pos = reinterpret_cast<alloc_header*>(current_top);
 
-            // initial user area right after header
+            // initial user area
             void* user_ua = current_top + sizeof(alloc_header);
             std::size_t ava = free_space - sizeof(alloc_header);
 
@@ -162,7 +146,6 @@ namespace vallocs::stack {
             const std::size_t padding =
                 static_cast<std::size_t>(user_byte - (current_top + sizeof(alloc_header)));
 
-            // Fill header at header_pos
             header_pos->previous_offset = hdr->offset;
             header_pos->size = total_size;
             header_pos->padding = static_cast<std::uint16_t>(padding);

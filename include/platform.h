@@ -6,8 +6,8 @@
 #define VALLOCS_PLATFORM_H
 #include <cstddef>
 
-namespace platform::bump {
-    class platform_memory {
+namespace platform {
+    class memory {
     public:
         static void* reserve(std::size_t bytes);
         static void* commit(void* addr, std::size_t bytes);
@@ -15,22 +15,6 @@ namespace platform::bump {
         static bool release(void* region);
         static bool release(void* addr, std::size_t bytes);
     };
-}
-
-namespace platform::stack {
-
-}
-
-namespace platform::fl {
-
-}
-
-namespace platform::pool {
-
-}
-
-namespace platform::buddy{
-
 }
 
 #endif //VALLOCS_PLATFORM_H

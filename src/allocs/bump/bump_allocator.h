@@ -14,7 +14,7 @@
 namespace vallocs::bump {
     template <typename T>
     class bump_allocator {
-        // swap this to unique_ptr
+        // swap this to unique_ptr??
         std::shared_ptr<void> base_ptr_;
         size_t offset_{0};
         size_t last_offset_{0};
@@ -33,12 +33,12 @@ namespace vallocs::bump {
 
     public:
         explicit bump_allocator(const size_t capacity) noexcept {
-            void* base_raw = platform::bump::platform_memory::reserve(capacity);
+            void* base_raw = platform::memory::reserve(capacity);
             if (!base_raw) throw std::bad_alloc();
-            if (!platform::bump::platform_memory::commit(base_raw, capacity))
+            if (!platform::memory::commit(base_raw, capacity))
                 throw std::bad_alloc();
             base_ptr_ = std::shared_ptr<void>(base_raw, [capacity](void* p) {
-                if (p) platform::bump::platform_memory::release(p, capacity);
+                if (p) platform::memory::release(p, capacity);
             });
             capacity_ = capacity;
         }
