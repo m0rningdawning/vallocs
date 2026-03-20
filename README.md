@@ -16,3 +16,6 @@ Various mamory allocators implemented in C++
   - [x] Basic alloc
   - [ ] Proper alloc
   - [ ] Test with gTest
+- [ ] Pool Allocator
+- [ ] Free-List Allocator
+- [ ] Buddy Allocator

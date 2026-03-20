@@ -16,26 +16,26 @@
 // Test that shi
 namespace vallocs::stack {
     struct alloc_header {
-        std::size_t previous_offset{0};
-        std::size_t size{0};
-        std::uint16_t padding{0};
+        size_t previous_offset{0};
+        size_t size{0};
+        uint16_t padding{0};
     };
 
     struct stack_header {
-        std::size_t capacity{0};
-        std::size_t offset{0};
-        std::uint16_t alignment{alignof(std::max_align_t)};
-        std::uint32_t allocation_count{0};
+        size_t capacity{0};
+        size_t offset{0};
+        uint16_t alignment{alignof(std::max_align_t)};
+        uint32_t allocation_count{0};
 
-        void init(const std::size_t cap, const std::size_t align = alignof(std::max_align_t)) noexcept {
-            alignment = static_cast<std::uint16_t>(align);
+        void init(const size_t cap, const size_t align = alignof(max_align_t)) noexcept {
+            alignment = static_cast<uint16_t>(align);
             capacity = cap;
             offset = 0;
             allocation_count = 0;
         }
 
-        std::size_t used() const noexcept { return offset; }
-        std::size_t remaining() const noexcept { return capacity - used(); }
+        [[nodiscard]] size_t used() const noexcept { return offset; }
+        [[nodiscard]] size_t remaining() const noexcept { return capacity - used(); }
     };
 
     inline stack_header* get_stack_header(void* base_usable) noexcept {
@@ -47,16 +47,16 @@ namespace vallocs::stack {
     template <typename T>
     class stack_allocator {
         std::shared_ptr<void> base_ptr_;
-        std::size_t capacity_{0};
-        std::size_t offset_{0};
+        size_t capacity_{0};
+        size_t offset_{0};
 
     public:
         stack_allocator() noexcept = default;
 
-        stack_allocator(void* base_ptr, const std::size_t capacity) noexcept
+        stack_allocator(void* base_ptr, const size_t capacity) noexcept
             : base_ptr_(base_ptr, [](void*) noexcept {}), capacity_(capacity) {
             if (auto* hdr = get_stack_header(base_ptr_.get())) {
-                hdr->init(capacity_, alignof(std::max_align_t));
+                hdr->init(capacity_, alignof(max_align_t));
                 offset_ = hdr->offset;
             }
         }
@@ -72,11 +72,11 @@ namespace vallocs::stack {
               offset_(other.offset_) {
         }
 
-        explicit stack_allocator(const std::size_t capacity) {
+        explicit stack_allocator(const size_t capacity) {
             if (capacity == 0) throw std::bad_alloc();
 
-            constexpr std::size_t header_bytes = sizeof(stack_header);
-            const std::size_t total_bytes = header_bytes + capacity;
+            constexpr size_t header_bytes = sizeof(stack_header);
+            const size_t total_bytes = header_bytes + capacity;
             capacity_ = capacity;
 
             void* region = platform::memory::reserve(total_bytes);
@@ -105,10 +105,10 @@ namespace vallocs::stack {
             }
         }
 
-        [[nodiscard]] T* allocate(std::size_t n) {
+        [[nodiscard]] T* allocate(size_t n) {
             if (n == 0) return nullptr;
 
-            if (n > std::numeric_limits<std::size_t>::max() / sizeof(T))
+            if (n > std::numeric_limits<size_t>::max() / sizeof(T))
                 throw std::bad_alloc();
 
             void* base = base_ptr_.get();
@@ -117,13 +117,13 @@ namespace vallocs::stack {
             auto* hdr = get_stack_header(base);
             if (!hdr) throw std::bad_alloc();
 
-            const std::size_t total_size = n * sizeof(T);
-            const std::size_t align = std::max<std::size_t>(alignof(T), hdr->alignment);
+            const size_t total_size = n * sizeof(T);
+            const size_t align = std::max<size_t>(alignof(T), hdr->alignment);
 
             auto* region_start = static_cast<std::byte*>(base);
             auto* current_top = region_start + hdr->offset;
 
-            const std::size_t free_space =
+            const size_t free_space =
                 (hdr->offset <= hdr->capacity) ? (hdr->capacity - hdr->offset) : 0;
 
             // space for header + payload (plus some padding)
@@ -134,7 +134,7 @@ namespace vallocs::stack {
 
             // initial user area
             void* user_ua = current_top + sizeof(alloc_header);
-            std::size_t ava = free_space - sizeof(alloc_header);
+            size_t ava = free_space - sizeof(alloc_header);
 
             void* user_ptr = user_ua;
             if (std::align(align, total_size, user_ptr, ava) == nullptr)
@@ -143,8 +143,8 @@ namespace vallocs::stack {
             auto* user_byte = static_cast<std::byte*>(user_ptr);
 
             // padding between end of header and payload
-            const std::size_t padding =
-                static_cast<std::size_t>(user_byte - (current_top + sizeof(alloc_header)));
+            const auto padding =
+                static_cast<size_t>(user_byte - (current_top + sizeof(alloc_header)));
 
             header_pos->previous_offset = hdr->offset;
             header_pos->size = total_size;
@@ -152,7 +152,7 @@ namespace vallocs::stack {
 
             // New top is end of payload
             const std::byte* new_top = user_byte + total_size;
-            hdr->offset = static_cast<std::size_t>(new_top - region_start);
+            hdr->offset = static_cast<size_t>(new_top - region_start);
             hdr->allocation_count += 1;
 
             offset_ = hdr->offset;
@@ -160,7 +160,7 @@ namespace vallocs::stack {
             return reinterpret_cast<T*>(user_byte);
         }
 
-        void deallocate(T* p, std::size_t /* n */) {
+        void deallocate(T* p, size_t /* n */) {
             if (!p || !base_ptr_) return;
 
             void* base = base_ptr_.get();
@@ -172,8 +172,8 @@ namespace vallocs::stack {
 
             auto* ah = reinterpret_cast<alloc_header*>(user_byte - sizeof(alloc_header));
 
-            std::size_t expected_offset =
-                static_cast<std::size_t>((user_byte + ah->size) - region_start);
+            auto expected_offset =
+                static_cast<size_t>((user_byte + ah->size) - region_start);
 
             if (hdr->offset == expected_offset) {
                 hdr->offset = ah->previous_offset;
@@ -186,15 +186,15 @@ namespace vallocs::stack {
             }
         }
 
-        void* base_ptr() const noexcept {
+        [[nodiscard]] void* base_ptr() const noexcept {
             return base_ptr_.get();
         }
 
-        std::size_t capacity() const noexcept {
+        [[nodiscard]] size_t capacity() const noexcept {
             return capacity_;
         }
 
-        std::size_t offset() const noexcept {
+        [[nodiscard]] size_t offset() const noexcept {
             return offset_;
         }
 
