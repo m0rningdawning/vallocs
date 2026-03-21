@@ -8,6 +8,7 @@
 
 #include "allocs/bump/bump_allocator.h"
 #include "allocs/stack/stack_allocator.h"
+#include "allocs/pool/pool_allocator.h"
 
 enum class alocs_e {
     BUMP_ALLOCATOR = 1,
