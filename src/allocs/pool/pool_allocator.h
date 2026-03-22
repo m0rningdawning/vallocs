@@ -49,9 +49,8 @@ namespace vallocs::pool {
         }
 
         explicit pool_allocator(const size_t size, const size_t chunk_size) {
-            page_(size);
             if (size == 0 || chunk_size == 0) {
-                throw std::invalid_argument("Arguments [size, chunk_size] cannot be 0!\n");
+                throw std::invalid_argument("Arguments [size, chunk_size] cannot be 0!");
             }
             if (chunk_size > size) {
                 std::cerr << "Chunk can't be larger than the overall size! Will shrink to fit.\n";
@@ -63,6 +62,7 @@ namespace vallocs::pool {
             chunk_size_ = std::max(chunk_size_, min_chunk_size_());
             size_ = size;
             n_chunks_ = size_ / chunk_size_;
+            page_(size);
             free_all();
         }
 
@@ -89,7 +89,6 @@ namespace vallocs::pool {
 
         pool_allocator(const pool_allocator&) = delete;
         pool_allocator& operator=(const pool_allocator&) = delete;
-
 
         ~pool_allocator() {
             if (owns_memory_ && base_ptr_) {
