@@ -13,6 +13,7 @@
 enum class alocs_e {
     BUMP_ALLOCATOR = 1,
     STACK_ALLOCATOR = 2,
+    POOL_ALLOCATOR = 3,
 };
 
 void test_bump() {
@@ -62,6 +63,44 @@ void test_stack() {
     std::cout << static_cast<void*>(buf2) << "\n";
 }
 
+void test_pool() {
+    std::cout << "Pool Allocator Test:\n";
+    srand(time(nullptr));
+    vallocs::pool::pool_allocator<char> pa(1024);
+    char* buf = pa.allocate();
+    char* buf2 = pa.allocate();
+    char* buf3 = pa.allocate();
+    char* buf4 = pa.allocate();
+
+    for (int i = 0; i < 256; ++i) {
+        buf[i] = std::rand() % (122 - 97 + 1) + 97;
+        buf2[i] = std::rand() % (122 - 97 + 1) + 97;
+        buf3[i] = std::rand() % (122 - 97 + 1) + 97;
+        buf4[i] = std::rand() % (122 - 97 + 1) + 97;
+    }
+
+    std::cout << "Buf 1:\n";
+    for (int i = 0; i < 256; ++i) std::cout << buf[i];
+
+    std::cout << "\nBuf 2:\n";
+    for (int i = 0; i < 256; ++i) std::cout << buf2[i];
+
+    std::cout << "\nBuf 3:\n";
+    for (int i = 0; i < 256; ++i) std::cout << buf3[i];
+
+    std::cout << "\nBuf 4:\n";
+    for (int i = 0; i < 256; ++i) std::cout << buf4[i];
+
+    char* buf5 = pa.allocate();
+    pa.free(buf3);
+    buf5 = pa.allocate();
+
+    std::cout << "\n" << static_cast<void*>(buf) << "\n";
+    std::cout << static_cast<void*>(buf2) << "\n";
+    std::cout << static_cast<void*>(buf3) << "\n";
+    std::cout << static_cast<void*>(buf4) << "\n";
+}
+
 int main() {
     int alloc {};
     bool chosen { false };
@@ -76,6 +115,11 @@ int main() {
             }
             case static_cast<int>(alocs_e::STACK_ALLOCATOR): {
                 test_stack();
+                chosen = true;
+                break;
+            }
+            case static_cast<int>(alocs_e::POOL_ALLOCATOR): {
+                test_pool();
                 chosen = true;
                 break;
             }
