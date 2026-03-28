@@ -21,6 +21,7 @@ enable_testing()
 add_subdirectory(src/allocs/stack)
 add_subdirectory(src/allocs/bump)
 add_subdirectory(src/allocs/pool)
+add_subdirectory(src/allocs/free_list)
 add_subdirectory(src/platform)
 add_subdirectory(tests)
 

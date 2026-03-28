@@ -9,11 +9,13 @@
 #include "allocs/bump/bump_allocator.h"
 #include "allocs/stack/stack_allocator.h"
 #include "allocs/pool/pool_allocator.h"
+#include "allocs/free_list/fl_allocator.h"
 
 enum class alocs_e {
     BUMP_ALLOCATOR = 1,
     STACK_ALLOCATOR = 2,
     POOL_ALLOCATOR = 3,
+    FL_ALLOCATOR = 4,
 };
 
 void test_bump() {
@@ -101,6 +103,8 @@ void test_pool() {
     std::cout << static_cast<void*>(buf4) << "\n";
 }
 
+void test_fl() {}
+
 int main() {
     int alloc {};
     bool chosen { false };
@@ -123,7 +127,12 @@ int main() {
                 chosen = true;
                 break;
             }
-            default: {
+            case static_cast<int>(alocs_e::FL_ALLOCATOR): {
+                test_fl();
+                chosen = true;
+                break;
+            }
+        default: {
                 std::cout << "No allocator chosen, please choose one of the allocators from the enum"  << "\n" ;
                 break;
             }
