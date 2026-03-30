@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <memory>
 #include <iostream>
 #include "platform.h"
 
@@ -92,7 +91,12 @@ namespace vallocs::pool {
 
         ~pool_allocator() {
             if (owns_memory_ && base_ptr_) {
+#ifdef __linux__
                 platform::memory::release(base_ptr_, size_);
+#endif
+#ifdef  _WIN32
+                platform::memory::release(base_ptr_);
+#endif
             }
         }
 

@@ -4,7 +4,6 @@
 
 #ifdef _WIN32
 #include "platform.h"
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 namespace platform {
@@ -33,10 +32,6 @@ namespace platform {
     bool memory::release(void* region) {
         if (!region) return false;
         return VirtualFree(region, 0, MEM_RELEASE) != 0;
-    }
-    bool memory::release(void* addr, std::size_t /* bytes placeholder to keep the api unified */) {
-        if (!addr) return false;
-        return release(addr);
     }
 }
 

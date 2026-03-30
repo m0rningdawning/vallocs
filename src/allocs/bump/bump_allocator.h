@@ -38,7 +38,12 @@ namespace vallocs::bump {
             if (!platform::memory::commit(base_raw, capacity))
                 throw std::bad_alloc();
             base_ptr_ = std::shared_ptr<void>(base_raw, [capacity](void* p) {
+#ifdef __linux__
                 if (p) platform::memory::release(p, capacity);
+#endif
+#ifdef  _WIN32
+                if (p) platform::memory::release(p);
+#endif
             });
             capacity_ = capacity;
         }
@@ -95,7 +100,7 @@ namespace vallocs::bump {
             capacity_ = 0;
         }
 
-        void rewind (const size_t marker) {
+        void rewind(const size_t marker) {
             if (marker <= offset_ && marker <= capacity_) offset_ = marker;
         }
 

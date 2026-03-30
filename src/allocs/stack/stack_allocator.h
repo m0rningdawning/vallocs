@@ -54,7 +54,8 @@ namespace vallocs::stack {
         stack_allocator() noexcept = default;
 
         stack_allocator(void* base_ptr, const size_t capacity) noexcept
-            : base_ptr_(base_ptr, [](void*) noexcept {}), capacity_(capacity) {
+            : base_ptr_(base_ptr, [](void*) noexcept {
+            }), capacity_(capacity) {
             if (auto* hdr = get_stack_header(base_ptr_.get())) {
                 hdr->init(capacity_, alignof(max_align_t));
                 offset_ = hdr->offset;
@@ -82,7 +83,12 @@ namespace vallocs::stack {
             void* region = platform::memory::reserve(total_bytes);
             if (!region) throw std::bad_alloc();
             if (!platform::memory::commit(region, total_bytes)) {
+#ifdef __linux__
                 platform::memory::release(region, total_bytes);
+#endif
+#ifdef  _WIN32
+                platform::memory::release(region);
+#endif
                 throw std::bad_alloc();
             }
 
@@ -93,7 +99,12 @@ namespace vallocs::stack {
                 if (!p) return;
                 auto* usable = static_cast<std::byte*>(p);
                 auto* region_start = usable - sizeof(stack_header);
+#ifdef __linux__
                 platform::memory::release(region_start, total_bytes);
+#endif
+#ifdef  _WIN32
+                platform::memory::release(region_start);
+#endif
             });
 
             if (auto* hdr = get_stack_header(base_ptr_.get())) {
