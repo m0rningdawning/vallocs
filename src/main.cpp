@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include <span>
-#include <sys/stat.h>
 
 #include "allocs/bump/bump_allocator.h"
 #include "allocs/stack/stack_allocator.h"
@@ -103,7 +102,46 @@ void test_pool() {
     std::cout << static_cast<void*>(buf4) << "\n";
 }
 
-void test_fl() {}
+void test_fl() {
+    std::cout << "Free List Allocator Test:\n";
+    srand(time(nullptr));
+    vallocs::fl::free_list<char> fla(2048, vallocs::fl::policy::FIND_FIRST);
+
+    char* buf1 = fla.allocate(256, 8);
+    char* buf2 = fla.allocate(512, 16);
+    char* buf3 = fla.allocate(256, 8);
+
+    for (int i = 0; i < 256; ++i) {
+        buf1[i] = std::rand() % (122 - 97 + 1) + 97;
+        buf3[i] = std::rand() % (122 - 97 + 1) + 97;
+    }
+    for (int i = 0; i < 512; ++i) {
+        buf2[i] = std::rand() % (122 - 97 + 1) + 97;
+    }
+
+    std::cout << "Buf 1:\n";
+    for (int i = 0; i < 256; ++i) std::cout << buf1[i];
+    std::cout << "\nBuf 2:\n";
+    for (int i = 0; i < 512; ++i) std::cout << buf2[i];
+    std::cout << "\nBuf 3:\n";
+    for (int i = 0; i < 256; ++i) std::cout << buf3[i];
+
+    std::cout << "\n\nAddresses:\n";
+    std::cout << "Buf 1: " << static_cast<void*>(buf1) << "\n";
+    std::cout << "Buf 2: " << static_cast<void*>(buf2) << "\n";
+    std::cout << "Buf 3: " << static_cast<void*>(buf3) << "\n";
+
+    std::cout << "\nFreeing Buf 2...\n";
+    fla.free(buf2);
+
+    std::cout << "Allocating Buf 4 (128 bytes)...\n";
+    char* buf4 = fla.allocate(128, 8);
+    std::cout << "Buf 4: " << static_cast<void*>(buf4) << "\n";
+
+    std::cout << "Freeing Buf 1 and Buf 3...\n";
+    fla.free(buf1);
+    fla.free(buf3);
+}
 
 int main() {
     int alloc {};

@@ -17,7 +17,7 @@ namespace vallocs::pool {
             fl_chunk* next;
         };
 
-        void* base_ptr_;
+        void* base_ptr_ = nullptr;
         size_t size_;
         size_t chunk_size_;
         size_t n_chunks_;
