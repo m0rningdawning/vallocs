@@ -32,7 +32,6 @@ namespace vallocs::fl {
         size_t used_;
         fl_chunk* head_;
         policy policy_;
-        bool owns_memory_ = false;
 
         void page_(const size_t size) {
             void* base_raw = platform::memory::reserve(size);
@@ -40,7 +39,6 @@ namespace vallocs::fl {
             if (!platform::memory::commit(base_raw, size))
                 throw std::bad_alloc();
             base_ptr_ = base_raw;
-            owns_memory_ = true;
         }
 
         void node_insert(fl_chunk* prev_node, fl_chunk* new_node) {
@@ -75,14 +73,12 @@ namespace vallocs::fl {
         }
 
         ~free_list() {
-            if (owns_memory_ && base_ptr_) {
 #ifdef __linux__
-                platform::memory::release(base_ptr_, size_);
+            platform::memory::release(base_ptr_, size_);
 #endif
 #ifdef  _WIN32
-                platform::memory::release(base_ptr_);
+            platform::memory::release(base_ptr_);
 #endif
-            }
         }
 
         free_list(const free_list&) = delete;
@@ -105,7 +101,7 @@ namespace vallocs::fl {
             while (node != nullptr) {
                 padding = calc_padding(reinterpret_cast<uintptr_t>(node), static_cast<uintptr_t>(alignment),
                                        sizeof(fl_header));
-                if (const size_t required_space = size + padding; node->size >= required_space) {
+                if (node->size >= size + padding) {
                     break;
                 }
                 prev_node = node;
@@ -145,9 +141,9 @@ namespace vallocs::fl {
         }
 
         [[nodiscard]] T* allocate(size_t size, size_t alignment) {
-            size_t padding = 0;
             fl_chunk* prev_node = nullptr;
             fl_chunk* node = nullptr;
+            size_t padding = 0;
 
             if (size < sizeof(fl_chunk)) {
                 size = sizeof(fl_chunk);
@@ -163,7 +159,7 @@ namespace vallocs::fl {
                 node = find_first(size, alignment, &padding, &prev_node);
             }
             if (node == nullptr) {
-                assert(0 && "Free list has no free memory");
+                assert(0 && "Free list has no free memory!");
             }
 
             const size_t alignment_padding = padding - sizeof(fl_header);
