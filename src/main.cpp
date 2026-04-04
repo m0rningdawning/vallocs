@@ -9,6 +9,7 @@
 #include "allocs/stack/stack_allocator.h"
 #include "allocs/pool/pool_allocator.h"
 #include "allocs/free_list/fl_allocator.h"
+#include "allocs/buddy/buddy_allocator.h"
 
 enum class alocs_e {
     BUMP_ALLOCATOR = 1,
