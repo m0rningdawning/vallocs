@@ -5,17 +5,18 @@
 #include <iostream>
 #include <span>
 
-#include "allocs/bump/bump_allocator.h"
-#include "allocs/stack/stack_allocator.h"
-#include "allocs/pool/pool_allocator.h"
-#include "allocs/free_list/fl_allocator.h"
 #include "allocs/buddy/buddy_allocator.h"
+#include "allocs/bump/bump_allocator.h"
+#include "allocs/free_list/fl_allocator.h"
+#include "allocs/pool/pool_allocator.h"
+#include "allocs/stack/stack_allocator.h"
 
 enum class alocs_e {
     BUMP_ALLOCATOR = 1,
     STACK_ALLOCATOR = 2,
     POOL_ALLOCATOR = 3,
     FL_ALLOCATOR = 4,
+    BUDDY_ALLOCATOR = 5,
 };
 
 void test_bump() {
@@ -33,10 +34,12 @@ void test_bump() {
     }
 
     std::cout << "Buf 1:\n";
-    for (int i = 0; i < 512; ++i) std::cout << buf[i];
+    for (int i = 0; i < 512; ++i)
+        std::cout << buf[i];
 
     std::cout << "\nBuf 2:\n";
-    for (const char c : buf2) std::cout << c;
+    for (const char c : buf2)
+        std::cout << c;
 
     std::cout << "\n" << static_cast<void*>(buf) << "\n";
     std::cout << static_cast<void*>(buf2.data()) << "\n";
@@ -56,10 +59,12 @@ void test_stack() {
     }
 
     std::cout << "Buf 1:\n";
-    for (int i = 0; i < 450; ++i) std::cout << buf[i];
+    for (int i = 0; i < 450; ++i)
+        std::cout << buf[i];
 
     std::cout << "\nBuf 2:\n";
-    for (int i = 0; i < 450; ++i) std::cout << buf2[i];
+    for (int i = 0; i < 450; ++i)
+        std::cout << buf2[i];
 
     std::cout << "\n" << static_cast<void*>(buf) << "\n";
     std::cout << static_cast<void*>(buf2) << "\n";
@@ -82,16 +87,20 @@ void test_pool() {
     }
 
     std::cout << "Buf 1:\n";
-    for (int i = 0; i < 256; ++i) std::cout << buf[i];
+    for (int i = 0; i < 256; ++i)
+        std::cout << buf[i];
 
     std::cout << "\nBuf 2:\n";
-    for (int i = 0; i < 256; ++i) std::cout << buf2[i];
+    for (int i = 0; i < 256; ++i)
+        std::cout << buf2[i];
 
     std::cout << "\nBuf 3:\n";
-    for (int i = 0; i < 256; ++i) std::cout << buf3[i];
+    for (int i = 0; i < 256; ++i)
+        std::cout << buf3[i];
 
     std::cout << "\nBuf 4:\n";
-    for (int i = 0; i < 256; ++i) std::cout << buf4[i];
+    for (int i = 0; i < 256; ++i)
+        std::cout << buf4[i];
 
     char* buf5 = pa.allocate();
     pa.free(buf3);
@@ -121,11 +130,14 @@ void test_fl() {
     }
 
     std::cout << "Buf 1:\n";
-    for (int i = 0; i < 256; ++i) std::cout << buf1[i];
+    for (int i = 0; i < 256; ++i)
+        std::cout << buf1[i];
     std::cout << "\nBuf 2:\n";
-    for (int i = 0; i < 512; ++i) std::cout << buf2[i];
+    for (int i = 0; i < 512; ++i)
+        std::cout << buf2[i];
     std::cout << "\nBuf 3:\n";
-    for (int i = 0; i < 256; ++i) std::cout << buf3[i];
+    for (int i = 0; i < 256; ++i)
+        std::cout << buf3[i];
 
     std::cout << "\n\nAddresses:\n";
     std::cout << "Buf 1: " << static_cast<void*>(buf1) << "\n";
@@ -144,9 +156,11 @@ void test_fl() {
     fla.free(buf3);
 }
 
+void test_buddy() {}
+
 int main() {
-    int alloc {};
-    bool chosen { false };
+    int alloc{};
+    bool chosen{false};
     do {
         std::cout << "Enter allocation type: " << std::flush;
         std::cin >> alloc;
@@ -171,11 +185,19 @@ int main() {
                 chosen = true;
                 break;
             }
-        default: {
-                std::cout << "No allocator chosen, please choose one of the allocators from the enum"  << "\n" ;
+            case static_cast<int>(alocs_e::BUDDY_ALLOCATOR): {
+                test_buddy();
+                chosen = true;
+                break;
+            }
+            default: {
+                std::cout << "No allocator chosen, please choose one of the allocators "
+                             "from the enum"
+                          << "\n";
                 break;
             }
         }
-    } while (!chosen);
+    }
+    while (!chosen);
     return 0;
 }

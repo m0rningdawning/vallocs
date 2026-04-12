@@ -26,25 +26,22 @@ namespace vallocs::buddy {
 
         void page_(const size_t size) {
             void* base_raw = platform::memory::reserve(size);
-            if (!base_raw) throw std::bad_alloc();
+            if (!base_raw)
+                throw std::bad_alloc();
             if (!platform::memory::commit(base_raw, size))
                 throw std::bad_alloc();
             head_ = base_raw;
             owns_memory_ = true;
         }
 
-        void split_(size_t block_index, size_t level) {
-        }
+        void split_(size_t block_index, size_t level) {}
 
-        void merge_(size_t block_index, size_t level) {
-        }
+        void merge_(size_t block_index, size_t level) {}
 
-        buddy_block* find_best_() const {
-        }
+        buddy_block* find_best_() const {}
 
     public:
-        explicit buddy_allocator(const size_t size) {
-        }
+        explicit buddy_allocator(const size_t size) {}
 
         // explicit buddy_allocator(void* buf, const size_t size) {}
 
@@ -56,18 +53,16 @@ namespace vallocs::buddy {
 #ifdef __linux__
                 platform::memory::release(head_, size_);
 #endif
-#ifdef  _WIN32
+#ifdef _WIN32
                 platform::memory::release(head_);
 #endif
             }
         }
 
-        [[nodiscard]] T* allocate(size_t n = 1, size_t alignment = 8) {
-        }
+        [[nodiscard]] T* allocate(size_t n = 1, size_t alignment = 8) {}
 
-        void free(T* ptr) {
-        }
+        void free(T* ptr) {}
     };
-}
+} // namespace vallocs::buddy
 
-#endif //VALLOCS_BUDDY_ALLOCATOR_H
+#endif // VALLOCS_BUDDY_ALLOCATOR_H

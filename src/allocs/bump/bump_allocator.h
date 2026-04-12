@@ -5,11 +5,11 @@
 #ifndef BUMP_ALLOCATOR_H
 #define BUMP_ALLOCATOR_H
 
+#include <cassert>
 #include <memory>
 #include <new>
-#include <cassert>
-#include "platform.h"
 #include "numeric"
+#include "platform.h"
 
 namespace vallocs::bump {
     template <typename T>
@@ -25,7 +25,8 @@ namespace vallocs::bump {
             size_t free_space = capacity_ >= offset_ ? capacity_ - offset_ : 0;
 
             void* resource = std::align(alignment, n, ua_resource, free_space);
-            if (!resource) return nullptr;
+            if (!resource)
+                return nullptr;
 
             offset_ += capacity_ - offset_ - free_space + n;
             return static_cast<T*>(resource);
@@ -34,29 +35,29 @@ namespace vallocs::bump {
     public:
         explicit bump_allocator(const size_t capacity) noexcept {
             void* base_raw = platform::memory::reserve(capacity);
-            if (!base_raw) throw std::bad_alloc();
+            if (!base_raw)
+                throw std::bad_alloc();
             if (!platform::memory::commit(base_raw, capacity))
                 throw std::bad_alloc();
             base_ptr_ = std::shared_ptr<void>(base_raw, [capacity](void* p) {
 #ifdef __linux__
-                if (p) platform::memory::release(p, capacity);
+                if (p)
+                    platform::memory::release(p, capacity);
 #endif
-#ifdef  _WIN32
-                if (p) platform::memory::release(p);
+#ifdef _WIN32
+                if (p)
+                    platform::memory::release(p);
 #endif
             });
             capacity_ = capacity;
         }
 
         explicit bump_allocator(void* buf, const size_t capacity) noexcept {
-            base_ptr_ = std::shared_ptr<void>(buf, [](void*) noexcept {
-            });
+            base_ptr_ = std::shared_ptr<void>(buf, [](void*) noexcept {});
             capacity_ = capacity;
         }
 
-        ~bump_allocator() {
-            release();
-        }
+        ~bump_allocator() { release(); }
 
         T* allocate(const size_t n = 1) {
             if (n > 0 && sizeof(T) > std::numeric_limits<size_t>::max() / n)
@@ -64,9 +65,7 @@ namespace vallocs::bump {
             return allocate_(sizeof(T) * n, alignof(T));
         }
 
-        std::span<T> allocate_span(std::size_t n) {
-            return {allocate(n), n};
-        }
+        std::span<T> allocate_span(std::size_t n) { return {allocate(n), n}; }
 
         // test this
         T* resize(T* ptr, const std::size_t old_count, const std::size_t new_count) {
@@ -90,9 +89,7 @@ namespace vallocs::bump {
             return ptr;
         }
 
-        void reset() {
-            offset_ = 0;
-        }
+        void reset() { offset_ = 0; }
 
         void release() {
             base_ptr_.reset();
@@ -101,13 +98,12 @@ namespace vallocs::bump {
         }
 
         void rewind(const size_t marker) {
-            if (marker <= offset_ && marker <= capacity_) offset_ = marker;
+            if (marker <= offset_ && marker <= capacity_)
+                offset_ = marker;
         }
 
-        [[nodiscard]] size_t get_marker() const noexcept {
-            return offset_;
-        }
+        [[nodiscard]] size_t get_marker() const noexcept { return offset_; }
     };
-}
+} // namespace vallocs::bump
 
-#endif //BUMP_ALLOCATOR_H
+#endif // BUMP_ALLOCATOR_H

@@ -5,18 +5,18 @@
 #ifndef FL_ALLOCATOR_H
 #define FL_ALLOCATOR_H
 
-#include <iostream>
 #include <cassert>
+#include <iostream>
 #include "platform.h"
 
 namespace vallocs::fl {
+    enum class policy {
+        FIND_FIRST = 1,
+        FIND_BEST = 2,
+    };
+
     template <typename T>
     class free_list {
-        enum class policy {
-            FIND_FIRST = 1,
-            FIND_BEST = 2,
-        };
-
         struct fl_header {
             size_t block_size;
             size_t padding;
@@ -35,7 +35,8 @@ namespace vallocs::fl {
 
         void page_(const size_t size) {
             void* base_raw = platform::memory::reserve(size);
-            if (!base_raw) throw std::bad_alloc();
+            if (!base_raw)
+                throw std::bad_alloc();
             if (!platform::memory::commit(base_raw, size))
                 throw std::bad_alloc();
             base_ptr_ = base_raw;
@@ -86,8 +87,10 @@ namespace vallocs::fl {
                 node = node->next;
             }
 
-            if (padding_) *padding_ = padding;
-            if (prev_node_) *prev_node_ = prev_node;
+            if (padding_)
+                *padding_ = padding;
+            if (prev_node_)
+                *prev_node_ = prev_node;
             return node;
         }
 
@@ -103,8 +106,8 @@ namespace vallocs::fl {
             while (node != nullptr) {
                 padding = calc_padding_(reinterpret_cast<uintptr_t>(node), static_cast<uintptr_t>(alignment),
                                         sizeof(fl_header));
-                if (const size_t required_space = size + padding; node->size >= required_space && (node->size -
-                    required_space < smallest_diff)) {
+                if (const size_t required_space = size + padding;
+                    node->size >= required_space && (node->size - required_space < smallest_diff)) {
                     best_node = node;
                     best_prev_node = prev_node;
                     best_padding = padding;
@@ -113,20 +116,22 @@ namespace vallocs::fl {
                 prev_node = node;
                 node = node->next;
             }
-            if (padding_) *padding_ = best_padding;
-            if (prev_node_) *prev_node_ = best_prev_node;
+            if (padding_)
+                *padding_ = best_padding;
+            if (prev_node_)
+                *prev_node_ = best_prev_node;
             return best_node;
         }
 
         void coalescence_(fl_chunk* prev_node, fl_chunk* free_node) {
-            if (free_node->next != nullptr && reinterpret_cast<char*>(free_node) + free_node->size ==
-                reinterpret_cast<char*>(free_node->next)) {
+            if (free_node->next != nullptr &&
+                reinterpret_cast<char*>(free_node) + free_node->size == reinterpret_cast<char*>(free_node->next)) {
                 free_node->size += free_node->next->size;
                 node_remove_(free_node, free_node->next);
             }
 
-            if (prev_node != nullptr && reinterpret_cast<char*>(prev_node) + prev_node->size ==
-                reinterpret_cast<char*>(free_node)) {
+            if (prev_node != nullptr &&
+                reinterpret_cast<char*>(prev_node) + prev_node->size == reinterpret_cast<char*>(free_node)) {
                 prev_node->size += free_node->size;
                 node_remove_(prev_node, free_node);
             }
@@ -150,7 +155,7 @@ namespace vallocs::fl {
 #ifdef __linux__
             platform::memory::release(base_ptr_, size_);
 #endif
-#ifdef  _WIN32
+#ifdef _WIN32
             platform::memory::release(base_ptr_);
 #endif
         }
@@ -225,6 +230,6 @@ namespace vallocs::fl {
             coalescence_(prev_node, free_node);
         }
     };
-}
+} // namespace vallocs::fl
 
-#endif //FL_ALLOCATOR_H
+#endif // FL_ALLOCATOR_H
