@@ -3,8 +3,8 @@
 //
 
 #ifdef _WIN32
-#include "platform.h"
 #include <windows.h>
+#include "platform.h"
 
 namespace platform {
     static std::size_t page_size() {
@@ -33,6 +33,6 @@ namespace platform {
         if (!region) return false;
         return VirtualFree(region, 0, MEM_RELEASE) != 0;
     }
-}
+} // namespace platform
 
 #endif

@@ -118,8 +118,7 @@ namespace vallocs::stack {
             if (n == 0)
                 return nullptr;
 
-            if (n > std::numeric_limits<size_t>::max() / sizeof(T))
-                throw std::bad_alloc();
+            if (n > std::numeric_limits<size_t>::max() / sizeof(T)) throw std::bad_alloc();
 
             void* base = base_ptr_.get();
             if (!base)
@@ -138,8 +137,7 @@ namespace vallocs::stack {
             const size_t free_space = (hdr->offset <= hdr->capacity) ? (hdr->capacity - hdr->offset) : 0;
 
             // space for header + payload (plus some padding)
-            if (free_space < sizeof(alloc_header) + total_size)
-                throw std::bad_alloc();
+            if (free_space < sizeof(alloc_header) + total_size) throw std::bad_alloc();
 
             auto* header_pos = reinterpret_cast<alloc_header*>(current_top);
 
@@ -148,8 +146,7 @@ namespace vallocs::stack {
             size_t ava = free_space - sizeof(alloc_header);
 
             void* user_ptr = user_ua;
-            if (std::align(align, total_size, user_ptr, ava) == nullptr)
-                throw std::bad_alloc();
+            if (std::align(align, total_size, user_ptr, ava) == nullptr) throw std::bad_alloc();
 
             auto* user_byte = static_cast<std::byte*>(user_ptr);
 
@@ -188,8 +185,7 @@ namespace vallocs::stack {
 
             if (hdr->offset == expected_offset) {
                 hdr->offset = ah->previous_offset;
-                if (hdr->allocation_count > 0)
-                    --hdr->allocation_count;
+                if (hdr->allocation_count > 0) --hdr->allocation_count;
                 offset_ = hdr->offset;
             }
             else {

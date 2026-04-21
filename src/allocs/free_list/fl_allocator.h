@@ -5,8 +5,8 @@
 #ifndef FL_ALLOCATOR_H
 #define FL_ALLOCATOR_H
 
-#include <cassert>
 #include <iostream>
+#include <cassert>
 #include "platform.h"
 
 namespace vallocs::fl {
@@ -35,10 +35,8 @@ namespace vallocs::fl {
 
         void page_(const size_t size) {
             void* base_raw = platform::memory::reserve(size);
-            if (!base_raw)
-                throw std::bad_alloc();
-            if (!platform::memory::commit(base_raw, size))
-                throw std::bad_alloc();
+            if (!base_raw) throw std::bad_alloc();
+            if (!platform::memory::commit(base_raw, size)) throw std::bad_alloc();
             base_ptr_ = base_raw;
         }
 
@@ -87,10 +85,8 @@ namespace vallocs::fl {
                 node = node->next;
             }
 
-            if (padding_)
-                *padding_ = padding;
-            if (prev_node_)
-                *prev_node_ = prev_node;
+            if (padding_) *padding_ = padding;
+            if (prev_node_) *prev_node_ = prev_node;
             return node;
         }
 
@@ -116,10 +112,8 @@ namespace vallocs::fl {
                 prev_node = node;
                 node = node->next;
             }
-            if (padding_)
-                *padding_ = best_padding;
-            if (prev_node_)
-                *prev_node_ = best_prev_node;
+            if (padding_) *padding_ = best_padding;
+            if (prev_node_) *prev_node_ = best_prev_node;
             return best_node;
         }
 
@@ -230,6 +224,6 @@ namespace vallocs::fl {
             coalescence_(prev_node, free_node);
         }
     };
-} // namespace vallocs::fl
+}
 
 #endif // FL_ALLOCATOR_H

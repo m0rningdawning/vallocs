@@ -95,7 +95,7 @@ namespace vallocs::pool {
 #ifdef __linux__
                 platform::memory::release(base_ptr_, size_);
 #endif
-#ifdef _WIN32
+#ifdef  _WIN32
                 platform::memory::release(base_ptr_);
 #endif
             }
@@ -112,8 +112,7 @@ namespace vallocs::pool {
         }
 
         void free(T* ptr) {
-            if (!ptr)
-                return;
+            if (!ptr) return;
             auto* p = reinterpret_cast<uint8_t*>(ptr);
             auto* start = static_cast<uint8_t*>(base_ptr_);
             auto* end = start + size_;
@@ -135,6 +134,6 @@ namespace vallocs::pool {
             }
         }
     };
-} // namespace vallocs::pool
+}
 
 #endif // POOL_ALLOCATOR_H

@@ -1,21 +1,17 @@
 # vallocs
-Various mamory allocators implemented in C++
+Various memory allocators implemented in C++
 
-### TODO
-- [ ] Bump Allocator
-  - [x] Create a basic, win version of the allocator
-  - [x] Abstract it + make linux hooks for cross-platform
-  - [x] Put templates on it
-  - [x] Make it iterable
-  - [x] Add protection
-  - [x] Possible growth strats
-  - [x] Test it with gtest
-  - [ ] Try to incorporate grpc/protobuf in it
-  - [ ] Clean-up, review, list of improvements, move on.
-- [ ] Stack Allocator
-  - [x] Basic alloc
-  - [ ] Proper alloc
-  - [ ] Test with gTest
-- [ ] Pool Allocator
-- [ ] Free-List Allocator
+## TODO
+- [x] Bump Allocator
+- [x] Stack Allocator
+- [x] Pool Allocator
+- [x] Free-List Allocator
 - [ ] Buddy Allocator
+### Misc
+- [x] Create basic, win versions of allocs
+- [x] Abstract 'em + make linux hooks for cross-platform
+- [x] Put templates on them
+- [x] Add protection
+- [x] Possible growth strats
+- [ ] Clean-up, review.
+- [ ] Test everything with gTest (Maybe someday)

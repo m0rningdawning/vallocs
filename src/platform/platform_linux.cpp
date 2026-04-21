@@ -3,11 +3,11 @@
 //
 
 #ifdef __linux__
-#include "platform.h"
-#include <sys/mman.h>
-#include <unistd.h>
 #include <cstddef>
 #include <cstdint>
+#include <sys/mman.h>
+#include <unistd.h>
+#include "platform.h"
 
 namespace platform {
     static std::size_t page_size() {
@@ -17,15 +17,13 @@ namespace platform {
 
     void* memory::reserve(std::size_t bytes) {
         if (!bytes) return nullptr;
-        void* p = ::mmap(nullptr, bytes, PROT_NONE,
-                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        void* p = ::mmap(nullptr, bytes, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         return (p == MAP_FAILED) ? nullptr : p;
     }
 
     void* memory::commit(void* addr, std::size_t bytes) {
         if (!addr || !bytes) return nullptr;
-        if (::mprotect(addr, bytes, PROT_READ | PROT_WRITE) != 0)
-            return nullptr;
+        if (::mprotect(addr, bytes, PROT_READ | PROT_WRITE) != 0) return nullptr;
         return addr;
     }
 
@@ -39,6 +37,6 @@ namespace platform {
         if (!addr || !bytes) return false;
         return ::munmap(addr, bytes) == 0;
     }
-}
+} // namespace platform
 
 #endif

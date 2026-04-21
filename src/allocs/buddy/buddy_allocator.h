@@ -26,10 +26,8 @@ namespace vallocs::buddy {
 
         void page_(const size_t size) {
             void* base_raw = platform::memory::reserve(size);
-            if (!base_raw)
-                throw std::bad_alloc();
-            if (!platform::memory::commit(base_raw, size))
-                throw std::bad_alloc();
+            if (!base_raw) throw std::bad_alloc();
+            if (!platform::memory::commit(base_raw, size)) throw std::bad_alloc();
             head_ = base_raw;
             owns_memory_ = true;
         }
@@ -63,6 +61,6 @@ namespace vallocs::buddy {
 
         void free(T* ptr) {}
     };
-} // namespace vallocs::buddy
+}
 
 #endif // VALLOCS_BUDDY_ALLOCATOR_H
