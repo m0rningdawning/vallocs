@@ -5,14 +5,12 @@
 #ifndef VALLOCS_BUDDY_ALLOCATOR_H
 #define VALLOCS_BUDDY_ALLOCATOR_H
 
-#include <iostream>
 #include <cassert>
+#include <iostream>
 #include "platform.h"
 
 namespace vallocs::buddy {
-    constexpr bool is_power_of_two(size_t x) {
-        return x && ((x & (x - 1)) == 0);
-    }
+    constexpr bool is_power_of_two(size_t x) { return x && ((x & (x - 1)) == 0); }
 
     constexpr size_t align_forward_size(size_t size, size_t alignment) {
         return (size + alignment - 1) & ~(alignment - 1);
@@ -92,7 +90,8 @@ namespace vallocs::buddy {
                     }
                     curr = bb_next_(curr);
                 }
-            } while (merged);
+            }
+            while (merged);
         }
 
         buddy_block* find_best_(buddy_block* head, buddy_block* tail, size_t size) {
@@ -137,14 +136,14 @@ namespace vallocs::buddy {
         }
 
     public:
-        explicit buddy_allocator(const size_t size, const size_t alignment = sizeof(buddy_block))
-            : alignment_(alignment), size_(size) {
+        explicit buddy_allocator(const size_t size, const size_t alignment = sizeof(buddy_block)) :
+            alignment_(alignment), size_(size) {
             page_(size);
             init_(head_, size, alignment);
         }
 
-        explicit buddy_allocator(void* buf, const size_t size, const size_t alignment = sizeof(buddy_block))
-            : alignment_(alignment), size_(size) {
+        explicit buddy_allocator(void* buf, const size_t size, const size_t alignment = sizeof(buddy_block)) :
+            alignment_(alignment), size_(size) {
             init_(buf, size, alignment);
         }
 
