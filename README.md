@@ -6,7 +6,7 @@ Various memory allocators implemented in C++
 - [x] Stack Allocator
 - [x] Pool Allocator
 - [x] Free-List Allocator
-- [ ] Buddy Allocator
+- [x] Buddy Allocator
 ## Misc
 - [x] Create basic, win versions of allocs
 - [x] Abstract 'em + make linux hooks for cross-platform
@@ -14,7 +14,7 @@ Various memory allocators implemented in C++
 - [x] Add protection
 - [x] Possible growth strats
 - [ ] Clean-up, review.
-- [ ] Test everything with gTest (Maybe someday)
+- [ ] Test everything with gTest (Maybe someday xD)
 
 ## Primary resource
 - https://www.gingerbill.org/series/memory-allocation-strategies/ - Wonderful guide of allocators by gingerBill.
