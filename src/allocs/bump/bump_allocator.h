@@ -32,7 +32,7 @@ namespace vallocs::bump {
         }
 
     public:
-        explicit bump_allocator(const size_t capacity) noexcept {
+        explicit bump_allocator(const size_t capacity) {
             void* base_raw = platform::memory::reserve(capacity);
             if (!base_raw) throw std::bad_alloc();
             if (!platform::memory::commit(base_raw, capacity)) throw std::bad_alloc();

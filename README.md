@@ -13,8 +13,8 @@ Various memory allocators implemented in C++
 - [x] Put templates on them
 - [x] Add protection
 - [x] Possible growth strats
-- [ ] Clean-up, review.
-- [ ] Test everything with gTest (Maybe someday xD)
+- [x] Clean-up, review.
+- [x] Test everything with gTest (Maybe someday xD)
 
 ## Primary resource
 - https://www.gingerbill.org/series/memory-allocation-strategies/ - Wonderful guide of allocators by gingerBill.

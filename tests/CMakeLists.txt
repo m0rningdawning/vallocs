@@ -43,3 +43,27 @@ add_gtest_suite(bump_tests
         SOURCES
         u_test_bump.cpp
 )
+
+# Stack allocator test suite
+add_gtest_suite(stack_tests
+        SOURCES
+        u_test_stack.cpp
+)
+
+# Pool allocator test suite
+add_gtest_suite(pool_tests
+        SOURCES
+        u_test_pool.cpp
+)
+
+# Free list allocator test suite
+add_gtest_suite(fl_tests
+        SOURCES
+        u_test_fl.cpp
+)
+
+# Buddy allocator test suite
+add_gtest_suite(buddy_tests
+        SOURCES
+        u_test_buddy.cpp
+)

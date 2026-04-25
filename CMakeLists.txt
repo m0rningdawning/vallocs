@@ -28,6 +28,7 @@ add_subdirectory(tests)
 
 # Libs link
 add_library(allocators_lib INTERFACE)
+target_include_directories(allocators_lib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(allocators_lib INTERFACE platform_lib bump_lib)
 
 add_executable(allocator_demo src/main.cpp)
