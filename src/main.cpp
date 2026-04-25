@@ -19,6 +19,48 @@ enum class alocs_e {
     BUDDY_ALLOCATOR = 5,
 };
 
+void test_buddy() {
+    std::cout << "Buddy Allocator Test:\n";
+    srand(time(nullptr));
+    vallocs::buddy::buddy_allocator<char> ba(1024, 16);
+
+    char* buf1 = ba.allocate(128, 16);
+    char* buf2 = ba.allocate(256, 16);
+    char* buf3 = ba.allocate(128, 16);
+
+    for (int i = 0; i < 128; ++i) {
+        buf1[i] = std::rand() % (122 - 97 + 1) + 97;
+        buf3[i] = std::rand() % (122 - 97 + 1) + 97;
+    }
+    for (int i = 0; i < 256; ++i) {
+        buf2[i] = std::rand() % (122 - 97 + 1) + 97;
+    }
+
+    std::cout << "Buf 1:\n";
+    for (int i = 0; i < 128; ++i) std::cout << buf1[i];
+    std::cout << "\nBuf 2:\n";
+    for (int i = 0; i < 256; ++i) std::cout << buf2[i];
+    std::cout << "\nBuf 3:\n";
+    for (int i = 0; i < 128; ++i) std::cout << buf3[i];
+
+    std::cout << "\n\nAddresses:\n";
+    std::cout << "Buf 1: " << static_cast<void*>(buf1) << "\n";
+    std::cout << "Buf 2: " << static_cast<void*>(buf2) << "\n";
+    std::cout << "Buf 3: " << static_cast<void*>(buf3) << "\n";
+
+    std::cout << "\nFreeing Buf 2...\n";
+    ba.free(buf2);
+
+    std::cout << "Allocating Buf 4 (256 bytes, reusing Buf 2 space)...\n";
+    char* buf4 = ba.allocate(256, 16);
+    std::cout << "Buf 4: " << static_cast<void*>(buf4) << "\n";
+
+    std::cout << "Freeing all buffers...\n";
+    ba.free(buf1);
+    ba.free(buf4);
+    ba.free(buf3);
+}
+
 void test_bump() {
     std::cout << "Bump/Arena Allocator Test:\n";
     srand(time(nullptr));
@@ -144,8 +186,6 @@ void test_fl() {
     fla.free(buf1);
     fla.free(buf3);
 }
-
-void test_buddy() {}
 
 int main() {
     int alloc{};
